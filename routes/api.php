@@ -16,16 +16,11 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-/*
-Route::group(['middleware' => 'auth.basic'], function () {
-    Route::get('/api/books', 'BookController@index');
-    Route::get('/api/books/{id}', 'BookController@show');
-    Route::post('/api/books', 'BookController@store');
-    Route::put('/api/books/{id}', 'BookController@update');
-    Route::delete('/api/books/{id}', 'BookController@destroy');
-});
-*/
-Route::group([''], function () {
+
+Route::post('register', 'UserController@register');
+Route::post('login', 'UserController@authenticate');
+
+Route::group(['middleware' => 'jwt.valid'], function () {
     Route::get('post', 'PostController@allPosts');
     Route::get('post/{id}/', 'PostController@showPost');
     Route::post('post', 'PostController@addPost');
@@ -38,7 +33,6 @@ Route::group([''], function () {
     Route::post('tag', 'TagController@addTag');
     Route::put('tag/{id}/', 'TagController@updateTag');
     Route::delete('tag/{id}/', 'TagController@deleteTag');
-
 
 });
 

@@ -13,11 +13,17 @@ class DatabaseSeeder extends Seeder
     {
         // $this->call(UsersTableSeeder::class);
 
-        DB::table('authors')->insert([
-            'name' => str_random(10),
+        DB::table('users')->insert([
+            'name' => str_random(8),
+            'email' => str_random(8) . '@gmail.com',
+            'password' => str_random(6),
+            'remember_token' => str_random(100),
         ]);
-        DB::table('authors')->insert([
+        DB::table('users')->insert([
             'name' => str_random(10),
+            'email' => str_random(10) . '@gmail.com',
+            'password' => str_random(6),
+            'remember_token' => str_random(100),
         ]);
 
         DB::table('tags')->insert([
@@ -28,7 +34,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('posts')->insert([
-            'author_id' => 1,
+            'user_id' => 1,
             'title' => 'Title Post One',
             'slug' => 'title-post-onde',
             'body' => str_random(500),
@@ -36,7 +42,7 @@ class DatabaseSeeder extends Seeder
             'published' => True
         ]);
         DB::table('posts')->insert([
-            'author_id' => 1,
+            'user_id' => 1,
             'title' => 'Title Post Two',
             'slug' => 'title-post-two',
             'body' => str_random(500),
@@ -44,7 +50,7 @@ class DatabaseSeeder extends Seeder
             'published' => True
         ]);
         DB::table('posts')->insert([
-            'author_id' => 1,
+            'user_id' => 1,
             'title' => 'Title Post Three',
             'slug' => 'title-post-three',
             'body' => str_random(500),
@@ -52,7 +58,7 @@ class DatabaseSeeder extends Seeder
             'published' => True
         ]);
         DB::table('posts')->insert([
-            'author_id' => 2,
+            'user_id' => 2,
             'title' => 'Title Post Four',
             'slug' => 'title-post-four',
             'body' => str_random(500),
