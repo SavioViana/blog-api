@@ -5,14 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+
 class Post extends Model
 {
     protected $fillable = ['title', 'slug', 'body', 'image', 'published'];
 
-    public function getPosts()
-    {
-        //return self::all();
-    }
 
     public function getTagsPost(int $id)
     {
@@ -26,8 +23,5 @@ class Post extends Model
         return $posts;
     }
 
-    public function savePost()
-    {
-        $input = Input::all();
-    }
+
 }
