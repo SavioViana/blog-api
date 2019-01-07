@@ -19,17 +19,20 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('register', 'UserController@register');
 Route::post('login', 'UserController@authenticate');
+Route::get('post', 'PostController@allPosts');
+Route::get('post/{id}/', 'PostController@showPost');
+
+Route::get('tag', 'TagController@allTag');
+Route::get('tag/{id}/', 'TagController@showTag');
 
 Route::group(['middleware' => 'jwt.valid'], function () {
-    Route::get('post', 'PostController@allPosts');
-    Route::get('post/{id}/', 'PostController@showPost');
+    
     Route::post('post', 'PostController@addPost');
     Route::put('post/{id}/', 'PostController@updatePost');
     Route::delete('post/{id}/', 'PostController@deletePost');
 
 
-    Route::get('tag', 'TagController@allTag');
-    Route::get('tag/{id}/', 'TagController@showTag');
+    
     Route::post('tag', 'TagController@addTag');
     Route::put('tag/{id}/', 'TagController@updateTag');
     Route::delete('tag/{id}/', 'TagController@deleteTag');
