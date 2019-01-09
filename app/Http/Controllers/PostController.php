@@ -27,12 +27,13 @@ class PostController extends Controller
     public function allPosts(Post $post)
     {   
         $posts = $post->all();
-
+        
         foreach ($posts as $key => $p)
         {
             $p->tags = $post->getTagsPost($p->id);
+            $p->author = $p->author()->getResults();
         }
-        
+    
         return Response::json([
             'success' => true,
             'length' => count($posts),
@@ -189,6 +190,7 @@ class PostController extends Controller
         
         if($post)
         {
+            $post->author = $post->author()->getResults();
             $post->tags = $post->getTagsPost($post->id);
 
             return Response::json([
@@ -228,4 +230,18 @@ class PostController extends Controller
         
     }
 
+
+    /**
+     * Method seach all post with specific tag
+     */
+    public function postsTag(PostTag $postTag, int $tagId){
+
+        $postTags = $postTag->posts($tagId);
+
+        return Response::json([
+            'success' => true,
+            'length' => count($postTags),
+            'data' => $postTags,
+        ], 200);
+    }
 }

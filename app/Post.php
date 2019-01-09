@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+use App\User;
 
 class Post extends Model
 {
@@ -23,5 +24,9 @@ class Post extends Model
         return $posts;
     }
 
+    public function author()
+    {
+        return $this->hasOne('App\User','id', 'user_id');
+    }
 
 }

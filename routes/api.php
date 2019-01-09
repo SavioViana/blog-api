@@ -21,12 +21,15 @@ Route::post('register', 'UserController@register');
 Route::post('login', 'UserController@authenticate');
 Route::get('post', 'PostController@allPosts');
 Route::get('post/{id}/', 'PostController@showPost');
+Route::get('post/tag/{id}', 'PostController@postsTag');
 
 Route::get('tag', 'TagController@allTag');
 Route::get('tag/{id}/', 'TagController@showTag');
 
 Route::group(['middleware' => 'jwt.valid'], function () {
     
+    Route::get('current_user', 'UserController@getAuthenticatedUser');
+
     Route::post('post', 'PostController@addPost');
     Route::put('post/{id}/', 'PostController@updatePost');
     Route::delete('post/{id}/', 'PostController@deletePost');
