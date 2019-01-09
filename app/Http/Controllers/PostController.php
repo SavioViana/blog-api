@@ -107,7 +107,7 @@ class PostController extends Controller
      */
     public function updatePost(Request $request, int $postId )
     {
-        //return $request;
+        //return $request;  
         if (!$postId) {
             return Response::json(['response' => 'Invalid id'], 400);
         }

@@ -34,6 +34,7 @@ class UserController extends Controller
     */
     public function register(Request $request)
     {
+        //return $request->all();
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:45',
             'email' => 'required|string|email|max:255|unique:users',
@@ -41,13 +42,18 @@ class UserController extends Controller
         ]);
 
         if($validator->fails()){
-                return response()->json($validator->errors()->toJson(), 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid data',
+                'errors' => $validator->errors(),
+            ], 400);
+                //return response()->json($validator->errors()->toJson(), 400);
         }
 
         $user = User::create([
-            'name' => $request->get('name'),
-            'email' => $request->get('email'),
-            'password' => Hash::make($request->get('password')),
+            'name' => $request->post('name'),
+            'email' => $request->post('email'),
+            'password' => Hash::make($request->post('password')),
         ]);
 
         $token = JWTAuth::fromUser($user);
