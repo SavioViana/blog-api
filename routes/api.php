@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,11 @@ Route::get('post/tag/{id}', 'PostController@postsTag');
 
 Route::get('tag', 'TagController@allTag');
 Route::get('tag/{id}/', 'TagController@showTag');
+
+Route::get('storage/image_post/{filename}', function ($filename)
+{
+    return Storage::disk('local')->get('image_post/' . $filename);
+});
 
 Route::group(['middleware' => 'jwt.valid'], function () {
     

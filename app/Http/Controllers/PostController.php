@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
 use Validator;
 use App\User;
+use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -46,12 +48,12 @@ class PostController extends Controller
      */
     public function addPost(Request $request)
     {   
-        
+        //return $request->file('file');
         $validatePost = Validator::make($request->all(), [
             'title'    => 'required|max:100|min:3',
             'slug'     => 'required|max:100|min:3',
             'body'     => 'required|min:5',
-            'image'    => 'required|max:100',
+            //'image'    => 'required|max:100',
             'published' => 'required|boolean',
             'tags'     => 'required',
         ]);
@@ -64,15 +66,21 @@ class PostController extends Controller
                 'errors' => $validatePost->errors(),
             ], 400);
         }
-
         
         $post = new Post();
         $post->user_id = $this->user->userAuthId();
         $post->title = $request->title;
         $post->slug = $request->slug;
         $post->body = $request->body;
-        $post->image = $request->image;
         $post->published = $request->published;
+        
+        if($request->file('image'))
+        {
+            $path = $request->file('image')->store('image_post');
+            $post->image = $path;
+        }
+
+        
     
         if($post->save())
         {
