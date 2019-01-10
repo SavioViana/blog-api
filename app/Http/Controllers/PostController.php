@@ -53,7 +53,6 @@ class PostController extends Controller
             'title'    => 'required|max:100|min:3',
             'slug'     => 'required|max:100|min:3',
             'body'     => 'required|min:5',
-            //'image'    => 'required|max:100',
             'published' => 'required|boolean',
             'tags'     => 'required',
         ]);
@@ -90,7 +89,7 @@ class PostController extends Controller
                 $postTag = new PostTag();
                 $postTag->post_id = $post->id;
                 $postTag->tag_id = $tagId;
-
+                
                 $postTag->save();
 
                 $tags[] = $postTag;
@@ -116,7 +115,7 @@ class PostController extends Controller
      */
     public function updatePost(Request $request, int $postId )
     {
-        //return $request;  
+          
         if (!$postId) {
             return Response::json(['response' => 'Invalid id'], 400);
         }
@@ -125,7 +124,6 @@ class PostController extends Controller
             'title'    => 'required|max:100|min:3',
             'slug'     => 'required|max:100|min:3',
             'body'     => 'required|min:5',
-            'image'    => 'required|max:100',
             'published' => 'required|boolean',
             'tags'    => 'required',
         ]);
@@ -143,8 +141,14 @@ class PostController extends Controller
         $post->title = $request->input('title');
         $post->slug = $request->input('slug');
         $post->body = $request->input('body');
-        $post->image = $request->input('image');
         $post->published = false;
+        
+        if($request->file('image'))
+        {
+            $path = $request->file('image')->store('image_post');
+            $post->image = $path;
+        }
+        
 
         if($post->save())
         {
