@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
+use App\Http\Requests\TagValidation;
 use \App\Tag;
-use Validator;
-
 
 class TagController extends Controller
 {
-    
-    public function __construct()
+    private $tag;
+
+    public function __construct(Tag $tag)
     {   
+        $this->tag = $tag;
     }
 
-    public function allTag(Tag $tag)
+    public function index()
     {   
-        $tags = $tag->all();
+        $tags = $this->tag->all();
 
         return Response::json([
             'success' => true,
@@ -28,26 +27,12 @@ class TagController extends Controller
         ], 200);
     }
 
-    public function addTag(Request $request)
+    public function store(TagValidation $request)
     {   
-        $validateTag = Validator::make($request->all(), [
-            'name'    => 'required|max:45|min:4',
-        ]);
-
-        if($validateTag->fails())
-        {
-            return Response::json([
-                'success' => false,
-                'message' => 'Invalid data',
-                'errors' => $validateTag->errors(),
-            ], 400);
-        }
-
         $tag = new Tag();
         $tag->name = $request->name;
 
-        if($tag->save())
-        {
+        if ($tag->save()) {
             return Response::json([
                 'success' => true,
                 'message' => 'Created tag',
@@ -61,33 +46,19 @@ class TagController extends Controller
         ], 400);
     }
 
-    public function updateTag(Request $request, int $tagId )
+    public function update(TagValidation $request, int $id )
     {
-        if (!$tagId) {
+        if (!$id) {
             return Response::json([
                 'success' => false,
                 'message' => 'Sorry, Invalid id'
             ], 400);
         }
 
-        $validateTag = Validator::make($request->all(), [
-            'name'    => 'required|max:45|min:4',
-        ]);
-
-        if($validateTag->fails())
-        {
-            return Response::json([
-                'success' => false,
-                'message' => 'Invalid data',
-                'errors' => $validateTag->errors(),
-            ], 400);
-        }
-
-        $tag = Tag::find($tagId);
+        $tag = $this->tag->find($id);
         $tag->name = $request->name;
         
-        if($tag->save())
-        {
+        if ($tag->save()) {
             return Response::json([
                 'success' => true,
                 'message' => 'Updated tag',
@@ -101,12 +72,11 @@ class TagController extends Controller
         ], 400);
     }
 
-    public function showTag(Tag $tag, int $tagId)
+    public function show(int $id)
     {
-        $tag = $tag->find($tagId);
+        $tag = $this->tag->find($id);
 
-        if($tag)
-        {
+        if ($tag) {
             return Response::json([
                 'success' => true,
                 'data' => $tag,
@@ -119,12 +89,11 @@ class TagController extends Controller
         ], 400);
     }
 
-    public function deleteTag(Tag $tag, int $tagId)
+    public function destroy(int $id)
     {
-        $tag = $tag->find($tagId);
+        $tag = $this->tag->find($id);
 
-        if($tag->delete())
-        {
+        if ($tag->delete()) {
             return Response::json([
                 'success' => true,
                 'message' => 'Deleted tag',
@@ -136,6 +105,24 @@ class TagController extends Controller
             'success' => false,
             'message' => 'Invalid tag',
         ], 400);
+    }
+
+    public function posts(int $id)
+    {
+        $tag = $this->tag->find($id);
+
+        if ($tag) {
+            return Response::json([
+                'success' => true,
+                'length' => $tag->posts->count(),
+                'data' => $tag->posts()->get(),
+            ], 200);
+        }
+
+        return Response::json([
+            'success' => false,
+            'message' => 'Invalid Tag',
+        ], 200);
     }
 
 }

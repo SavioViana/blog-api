@@ -3,37 +3,35 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Post;
-use App\PostTag;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Response;
-use Validator;
-use App\User;
 use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Support\Facades\File;
+use App\Http\Requests\PostValidation;
+use App\User;
+use App\Post;
 
 class PostController extends Controller
 {
-    
+    private $user; 
+    private $post;
 
-    public function __construct(User $user)
+    public function __construct(User $user, Post $post)
     {
         $this->user = $user;
+        $this->post = $post;
     }
 
     /*
     * Method return all posts this blog
     */
-    public function allPosts(Post $post)
+    public function index()
     {   
-        $posts = $post->all();
+        $posts = $this->post->all();
         
-        foreach ($posts as $key => $p)
-        {
-            $p->tags = $post->getTagsPost($p->id);
-            $p->author = $p->author()->getResults();
+        foreach ($posts as $key => $p) {
+            $p->tags = $p->tags()->get();
+            $p->author = $p->author()->get();
         }
     
         return Response::json([
@@ -46,56 +44,25 @@ class PostController extends Controller
     /**
      * Method insert one post in blog api
      */
-    public function addPost(Request $request)
-    {   
-        //return $request->file('file');
-        $validatePost = Validator::make($request->all(), [
-            'title'    => 'required|max:100|min:3',
-            'slug'     => 'required|max:100|min:3',
-            'body'     => 'required|min:5',
-            'published' => 'required|boolean',
-            'tags'     => 'required',
-        ]);
-        
-        if($validatePost->fails())
-        {
-            return Response::json([
-                'success' => false,
-                'message' => 'Invalid data',
-                'errors' => $validatePost->errors(),
-            ], 400);
-        }
-        
+    public function store(PostValidation $request)
+    {    
         $post = new Post();
-        $post->user_id = $this->user->userAuthId();
+        $post->user_id = Auth()->user()->id;
         $post->title = $request->title;
         $post->slug = $request->slug;
         $post->body = $request->body;
         $post->published = $request->published;
         
-        if($request->file('image'))
-        {
+        if ($request->file('image')) {
             $path = $request->file('image')->store('image_post');
             $post->image = $path;
         }
-
-        
     
-        if($post->save())
-        {
+        if ($post->save()) {
+
+            $post->tags()->sync($request->tags);
+            $post->tags = $post->tags()->get();
             $tags = array();
-            foreach ($request->tags as $key => $tagId) 
-            {
-                $postTag = new PostTag();
-                $postTag->post_id = $post->id;
-                $postTag->tag_id = $tagId;
-                
-                $postTag->save();
-
-                $tags[] = $postTag;
-            }
-
-            $post->tags = array_values($tags);
 
             return Response::json([
                 'success' => true,
@@ -113,71 +80,28 @@ class PostController extends Controller
     /**
      * Method update one post this blog
      */
-    public function updatePost(Request $request, int $postId )
+    public function update(PostValidation $request, int $id)
     {
-          
-        if (!$postId) {
+        if (!$id) {
             return Response::json(['response' => 'Invalid id'], 400);
         }
 
-        $validatePost = Validator::make($request->all(), [
-            'title'    => 'required|max:100|min:3',
-            'slug'     => 'required|max:100|min:3',
-            'body'     => 'required|min:5',
-            'published' => 'required|boolean',
-            'tags'    => 'required',
-        ]);
-        
-        if($validatePost->fails())
-        {
-            return Response::json([
-                'success' => false,
-                'message' => 'Invalid data',
-                'errors' => $validatePost->errors(),
-            ], 400);
-        }
+        $post = $this->post->find($id);
 
-        $post = Post::find($postId);
-        $post->title = $request->input('title');
-        $post->slug = $request->input('slug');
-        $post->body = $request->input('body');
-        $post->published = false;
-        
-        if($request->file('image'))
-        {
+        $post->title = $request->title;
+        $post->slug = $request->slug;
+        $post->body = $request->body;
+        $post->published = $request->published;
+
+        if ($request->file('image')) {
             $path = $request->file('image')->store('image_post');
             $post->image = $path;
         }
-        
 
-        if($post->save())
-        {
-
-            $postTags = PostTag::where('post_id', $post->id)->get();
-        
-            if ($postTags)
-            {
-                foreach ($postTags as $key => $postTag) {
-                   
-                    $postTag->delete();
-                }
-            }
-            
-
-            $tags = array();
-            foreach ($request->input('tags') as $key => $tagId) 
-            {
-                $postTag = new PostTag();
-                $postTag->post_id = $post->id;
-                $postTag->tag_id = $tagId;
-
-                $postTag->save();
-
-                $tags[] = $postTag;
-            }
-
-            $post->tags = array_values($tags);
-
+        if ($post->save()) {
+            $post->tags()->detach();
+            $post->tags()->sync($request->tags);
+            $post->tags = $post->tags()->get();
             return Response::json([
                 'success' => true,
                 'message' => 'Updated post',
@@ -196,14 +120,13 @@ class PostController extends Controller
     /**
      * Method return one specific post this blog
      */
-    public function showPost(Post $post, int $postId)
+    public function show(int $id)
     {
-        $post = $post->find($postId);
+        $post = $this->post->find($id);
         
-        if($post)
-        {
-            $post->author = $post->author()->getResults();
-            $post->tags = $post->getTagsPost($post->id);
+        if ($post) {
+            $post->author = $post->author()->get();
+            $post->tags = $post->tags()->get();
 
             return Response::json([
                 'success' => true,
@@ -220,12 +143,12 @@ class PostController extends Controller
     /**
      * Method remove one specific post this blog
      */
-    public function deletePost(Post $post, int $postId)
+    public function destroy(int $id)
     {
-        $post = $post->find($postId);
+        $post = $this->post->find($id);
 
-        if($post)
-        {
+        if ($post) {
+
             $post->delete();
 
             return Response::json([
@@ -239,13 +162,13 @@ class PostController extends Controller
             'success' => false,
             'message' => 'Invalid post',
         ], 400);
-        
     }
-
 
     /**
      * Method seach all post with specific tag
      */
+
+     /*
     public function postsTag(PostTag $postTag, int $tagId){
 
         $postTags = $postTag->posts($tagId);
@@ -255,5 +178,5 @@ class PostController extends Controller
             'length' => count($postTags),
             'data' => $postTags,
         ], 200);
-    }
+    }*/
 }

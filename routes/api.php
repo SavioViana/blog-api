@@ -3,48 +3,46 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+/*auth*/
 Route::post('register', 'UserController@register');
 Route::post('login', 'UserController@authenticate');
-Route::get('post', 'PostController@allPosts');
-Route::get('post/{id}/', 'PostController@showPost');
-Route::get('post/tag/{id}', 'PostController@postsTag');
 
-Route::get('tag', 'TagController@allTag');
-Route::get('tag/{id}/', 'TagController@showTag');
+/*posts*/
+Route::get('posts', 'PostController@index');
+Route::get('posts/{id}/', 'PostController@show');
+Route::get('tags/{id}/posts/', 'TagController@posts');
+
+/* tag */
+Route::get('tags', 'TagController@index');
+Route::get('tags/{id}/', 'TagController@show');
+
 
 Route::get('storage/image_post/{filename}', function ($filename)
 {
     return Storage::disk('local')->get('image_post/' . $filename);
 });
 
+
 Route::group(['middleware' => 'jwt.valid'], function () {
     
     Route::get('current_user', 'UserController@getAuthenticatedUser');
 
-    Route::post('post', 'PostController@addPost');
-    Route::put('post/{id}/', 'PostController@updatePost');
-    Route::delete('post/{id}/', 'PostController@deletePost');
-
+    /*posts */
+    Route::post('posts', 'PostController@store');
+    Route::put('posts/{id}', 'PostController@update');
+    Route::delete('posts/{id}/', 'PostController@destroy');
 
     
-    Route::post('tag', 'TagController@addTag');
-    Route::put('tag/{id}/', 'TagController@updateTag');
-    Route::delete('tag/{id}/', 'TagController@deleteTag');
+    /*tag */
+    Route::post('tags', 'TagController@store');
+    Route::put('tags/{id}/', 'TagController@update');
+    Route::delete('tags/{id}/', 'TagController@destroy');
 
 });
 

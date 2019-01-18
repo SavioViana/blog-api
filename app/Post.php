@@ -12,16 +12,9 @@ class Post extends Model
     protected $fillable = ['title', 'slug', 'body', 'image', 'published'];
 
 
-    public function getTagsPost(int $id)
+    public function tags()
     {
-        $posts = DB::table('posts')
-                ->join('post_tag', 'posts.id', '=', 'post_tag.post_id')
-                ->join('tags', 'post_tag.tag_id', '=', 'tags.id')
-                ->where('post_id', $id)
-                ->select('tags.*')
-                ->get();
-
-        return $posts;
+        return $this->belongsToMany('\App\Tag');
     }
 
     public function author()
