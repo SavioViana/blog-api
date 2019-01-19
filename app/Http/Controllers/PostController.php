@@ -163,20 +163,5 @@ class PostController extends Controller
             'message' => 'Invalid post',
         ], 400);
     }
-
-    /**
-     * Method seach all post with specific tag
-     */
-
-     /*
-    public function postsTag(PostTag $postTag, int $tagId){
-
-        $postTags = $postTag->posts($tagId);
-
-        return Response::json([
-            'success' => true,
-            'length' => count($postTags),
-            'data' => $postTags,
-        ], 200);
-    }*/
+    
 }
