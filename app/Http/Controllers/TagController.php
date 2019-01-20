@@ -112,10 +112,16 @@ class TagController extends Controller
         $tag = $this->tag->find($id);
 
         if ($tag) {
+
+            $tag->posts = $tag->posts()->get();
+            foreach ($tag->posts as $key => $post) {
+                $post->author = $post->author()->get();
+                $post->comments = $post->comments()->get();
+            }
             return Response::json([
                 'success' => true,
                 'length' => $tag->posts->count(),
-                'data' => $tag->posts()->get(),
+                'data' => $tag,
             ], 200);
         }
 

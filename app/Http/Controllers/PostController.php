@@ -32,6 +32,7 @@ class PostController extends Controller
         foreach ($posts as $key => $p) {
             $p->tags = $p->tags()->get();
             $p->author = $p->author()->get();
+            $p->comments = $p->comments()->get();
         }
     
         return Response::json([
@@ -127,6 +128,7 @@ class PostController extends Controller
         if ($post) {
             $post->author = $post->author()->get();
             $post->tags = $post->tags()->get();
+            $post->comments = $post->comments()->get();
 
             return Response::json([
                 'success' => true,
