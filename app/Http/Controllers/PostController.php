@@ -58,9 +58,8 @@ class PostController extends Controller
             $path = $request->file('image')->store('image_post');
             $post->image = $path;
         }
-    
+        
         if ($post->save()) {
-
             $post->tags()->sync($request->tags);
             $post->tags = $post->tags()->get();
             $tags = array();
@@ -94,6 +93,7 @@ class PostController extends Controller
         $post->body = $request->body;
         $post->published = $request->published;
 
+        
         if ($request->file('image')) {
             $path = $request->file('image')->store('image_post');
             $post->image = $path;
